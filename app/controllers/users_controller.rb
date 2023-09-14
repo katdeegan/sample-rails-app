@@ -13,6 +13,8 @@ class UsersController < ApplicationController
     @user = User.new(user_params)
     if @user.save
       # Handle a successful save.
+      reset_session
+      log_in @user
       # Default action would be to render corresponding view (i.e. views/users/create.html.erb)
       # INSTEAD, we want to redirect to a different page in app upon successful
       flash[:success] = "Welcome to the Sample App!"
