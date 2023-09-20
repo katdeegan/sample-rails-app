@@ -1,4 +1,7 @@
 class User < ApplicationRecord
+  # makes remember_token available via user.remember_token (for storage in cookies) WITHOUT storing in database
+  attr_accessor :remember_token
+
   # callback method to modify object attribute before saving to DB
   before_save { self.email = email.downcase }
 
@@ -26,5 +29,27 @@ class User < ApplicationRecord
     cost = ActiveModel::SecurePassword.min_cost ? BCrypt::Engine::MIN_COST :
                                                   BCrypt::Engine.cost
     BCrypt::Password.create(string, cost: cost)
+  end
+
+  # Returns a random "remember me" token.
+  def User.new_token
+    SecureRandom.urlsafe_base64
+  end
+
+  # Remembers a user in the database for use in persistent sessions.
+  # associates a remember token with the user
+  # saves the corresponding remember digest to the database
+  def remember
+    # self ensures you're setting user's remember_token attribute (as opposed to local var)
+    self.remember_token = User.new_token
+    # updates remember_digest attribute in backend
+    # method bypasses validations
+    update_attribute(:remember_digest, User.digest(remember_token))
+  end
+
+    # Returns true if the given token matches the digest.
+  def authenticated?(remember_token)
+    # remember_token argument here is NOT the same as the accessor :remember_token
+    BCrypt::Password.new(remember_digest).is_password?(remember_token)
   end
 end

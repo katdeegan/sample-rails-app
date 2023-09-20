@@ -10,6 +10,7 @@ class SessionController < ApplicationController
       # Log the user in and redirect to the user's show page.
       # .authenticate method comes from has_secure_password
       reset_session
+      remember user # remember helper to remember a logged-in user
       log_in user # login method define in session_helper.rb (included in Application Controller)
       redirect_to user #i.e. redirect_to user_url(user)
     else
