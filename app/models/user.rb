@@ -47,9 +47,19 @@ class User < ApplicationRecord
     update_attribute(:remember_digest, User.digest(remember_token))
   end
 
-    # Returns true if the given token matches the digest.
+  # Returns true if the given token matches the digest.
   def authenticated?(remember_token)
+    # if user logs in to app in two seperate browsers, then logs out in one browser, remember_digest is set to nil.
+    # without this line, when the second browser is closed and reopened, cookies.signed[:user_id] still exists so
+    # authenticated? would still be called and return an error because there's no remeber_digest
+    return false if remember_digest.nil?
     # remember_token argument here is NOT the same as the accessor :remember_token
     BCrypt::Password.new(remember_digest).is_password?(remember_token)
+  end
+
+  # Forgets a user.
+  # undoes user.remember
+  def forget
+    update_attribute(:remember_digest, nil)
   end
 end
