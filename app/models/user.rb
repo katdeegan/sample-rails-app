@@ -22,7 +22,12 @@ class User < ApplicationRecord
   # Rails method has_secure_password
   # adds virtual attributes password and password_confirmation to User model
   has_secure_password
-  validates :password, presence: true, length: { minimum: 6 }
+
+  # allow nil for password so users don't need to re-enter / change their password in
+  # the edit user form every time they make updates to their profile
+  # ** users will still not be able to sign up with empty passwords per has_secure_password
+  # which includes a separate presence validation that specifically catches nil passwords
+  validates :password, presence: true, length: { minimum: 6 }, allow_nil: true
 
   # Returns the hash digest of the given string.
   def User.digest(string)
@@ -45,6 +50,13 @@ class User < ApplicationRecord
     # updates remember_digest attribute in backend
     # method bypasses validations
     update_attribute(:remember_digest, User.digest(remember_token))
+    remember_digest
+  end
+
+  # Returns a session token to prevent session hijacking.
+  # We reuse the remember digest for convenience.
+  def session_token
+    remember_digest || remember
   end
 
   # Returns true if the given token matches the digest.

@@ -1,0 +1,12 @@
+<li>
+  <%= gravatar_for user, size: 50 %>
+  <%= link_to user.name, user %>
+  <!-- "Delete" option is only available if user is admin -->
+  <!-- Web browsers can't natively send DELETE requests, so Rails
+  fakes it with JavaAcript (JavaScript must be enabled). You can
+  also use a form + POST request to fake DELETE request. -->
+  <% if current_user.admin? && !current_user?(user) %>
+    | <%= link_to "delete", user, data: { "turbo-method": :delete,
+                                          turbo_confirm: "You sure?" } %>
+  <% end %>
+</li>

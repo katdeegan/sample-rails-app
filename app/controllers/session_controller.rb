@@ -9,12 +9,13 @@ class SessionController < ApplicationController
     if user && user.authenticate(params[:session][:password])
       # Log the user in and redirect to the user's show page.
       # .authenticate method comes from has_secure_password
+      forwarding_url = session[:forwarding_url]
       reset_session
       # remember helper to remember a logged-in user
       # only remember user if they select "Remember me" checkbox
       params[:session][:remember_me] == '1' ? remember(user) : forget(user)
       log_in user # login method define in session_helper.rb (included in Application Controller)
-      redirect_to user #i.e. redirect_to user_url(user)
+      redirect_to forwarding_url || user #i.e. redirect_to user or forwarding url (where user was trying to go)
     else
       # Create an error message.
       # Active Record objects (i.e. User model) have certain error messages associated with them
